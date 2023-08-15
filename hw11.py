@@ -1,65 +1,58 @@
 from collections import UserDict
 import datetime
 
+
 class Field:
-    def __init__(self, name):
-        self.name = name
-        self._value = None
+    def __init__(self, value):
+        self.__value = None
+        self.value = value
 
-    def set_value(self, value):
-        self._value = value
+    @property
+    def value(self) -> str:
+        return self.__value
 
-    def get_value(self):
-        return self._value
+    @value.setter
+    def value(self, value) -> None:
+        self.__value = value
 
 
 class Name(Field):
-    def __init__(self, value):
-        super().__init__('Ім\'я')
-        self.set_value(value)
+    
+    @property
+    def value(self) -> str:  #  це геттер, який повертає захищенне поле self.__value
+        return self.__value
 
-    def set_value(self, value):
-        if not value:
-            raise ValueError("Ім'я не може бути порожнім")
-        super().set_value(value)
+    @value.setter  # це сеттер який записує значення що приходить в конструктор(змінна value) тільки якщо пройде перевірку
+    def value(self, value) -> None:
+        if len(value) < 2:
+            raise ValueError("Імʼя повинно бути довже ніж 2 симовли")
+        self.__value = value
 
 
 class Phone(Field):
-    def __init__(self, value):
-        super().__init__('Телефон')
-        self.value = []
-        self.add_number(value)
+    
+    @property
+    def value(self) -> str:  # це геттер, який повертає захищенне поле self.__value
+        return self.__value
 
-    def add_number(self, number):
-        if not all(char.isdigit() for char in number):
-            raise ValueError("Номер телефону повинен складатися лише з цифр")
-        self.value.append(number)
-
-    def remove_number(self, number):
-        if number in self.value:
-            self.value.remove(number)
-
-    def set_value(self, value):
+    @value.setter  # це сеттер який записує значення що приходить в конструктор(змінна value) тільки якщо пройде перевірку
+    def value(self, value) -> None:
         if not all(char.isdigit() for char in value):
             raise ValueError("Номер телефону повинен складатися лише з цифр")
-        super().set_value(value)
-
-    def get_value(self):
-        return self.value
+        self.__value = value
 
 
 class Birthday(Field):
-    def __init__(self, value):
-        super().__init__('День народження')
-        self.set_value(value)
+    
+    @property
+    def value(self) -> datetime:  # це геттер, який повертає захищенне поле self.__value
+        return self.__value
 
-    def set_value(self, value):
+    @value.setter  # це сеттер який записує значення що приходить в конструктор(змінна value) тільки якщо пройде перевірку
+    def value(self, value) -> None:
         if not isinstance(value, datetime.date):
             raise ValueError("День народження повинен бути об'єктом datetime.date")
-        super().set_value(value)
-
-    def get_value(self):
-        return self._value
+        self.__value = value
 
 
 class Record:
@@ -92,9 +85,9 @@ class Record:
             self.optional_fields['День народження'] = birthday
 
     def days_to_birthday(self):
-        if 'День народження' in self.optional_fields and self.optional_fields['День народження'].get_value():
+        if 'День народження' in self.optional_fields and self.optional_fields['День народження'].value:
             today = datetime.date.today()
-            birthday = self.optional_fields['День народження'].get_value()
+            birthday = self.optional_fields['День народження'].value 
             next_birthday = datetime.date(today.year, birthday.month, birthday.day)
             if today > next_birthday:
                 next_birthday = datetime.date(today.year + 1, birthday.month, birthday.day)
@@ -104,7 +97,7 @@ class Record:
 
 class AddressBook(UserDict):
     def add_record(self, record):
-        self.data[record.name.get_value()] = record
+        self.data[record.name.value] = record
 
     def __iter__(self):
         self._iter_keys = iter(self.data.keys())
@@ -138,7 +131,7 @@ if __name__ == "__main__":
     assert isinstance(ab['Білл'].name, Name)
     assert isinstance(ab['Білл'].optional_fields['Телефон'], Phone)
     assert isinstance(ab['Білл'].optional_fields['День народження'], Birthday)
-    assert ab['Білл'].optional_fields['Телефон'].get_value()[0] == '1234567890'
+    assert ab['Білл'].optional_fields['Телефон'].value == '1234567890'
     assert ab['Білл'].days_to_birthday() == 365  # Change this based on current date and birthday
 
     print('Все Ок :)')
